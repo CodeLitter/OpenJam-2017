@@ -4,8 +4,17 @@ import pygame.math
 import math
 import glob
 import ntpath
+import os
 import random
 import Core
+
+# Constants
+VIEW_WIDTH = 1280
+VIEW_HEIGHT = 720
+ROOM_WIDTH = 2000
+ROOM_HEIGHT = 720
+FLOOR_HEIGHT = 200
+IMG_PATH = "images"
 
 
 class Player(sge.dsp.Object):
@@ -15,8 +24,8 @@ class Player(sge.dsp.Object):
         self.move_speed = move_speed
 
     def event_create(self):
-        self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory="images")
-        self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch", directory="images")
+        self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory=IMG_PATH)
+        self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch", directory=IMG_PATH)
         self.sprite = self.sprite_walk
         self.image_origin_x = self.sprite.width / 2
         self.image_origin_y = self.sprite.height - 20
@@ -73,8 +82,8 @@ class Obstacle(sge.dsp.Object):
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
                          checks_collisions=True)
-        self.bbox_y -= self.image_origin_x
-        self.bbox_x -= self.image_origin_y
+        self.bbox_x -= self.image_origin_x
+        self.bbox_y -= self.image_origin_y
 
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
@@ -109,9 +118,8 @@ class Victim(sge.dsp.Object):
         super().__init__(x, y, checks_collisions=True)
 
     def event_create(self):
-        print("event create")
-        self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory="images")
-        # self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory="images")
+        self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory=IMG_PATH)
+        # self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory=IMG_PATH)
         self.sprite = self.sprite_asleep
         self.image_origin_x = self.sprite.width
         self.image_origin_y = self.sprite.height
@@ -129,23 +137,21 @@ class Victim(sge.dsp.Object):
 
 
 # Create Game object
-Core.Game(width=1280, height=720, fps=60, window_text="Leave a mark")
-ROOM_WIDTH = sge.game.width * 2
-FLOOR_HEIGHT = 200
+Core.Game(width=VIEW_WIDTH, height=VIEW_HEIGHT, fps=60, window_text="Leave a mark")
 
 # Load Sprite
 # TODO find out the order of sprite drawing
 
 obstacle_sprites = []
-for filename in glob.iglob("./images/tableWquill*.*"):
+for filename in glob.iglob(os.path.join(IMG_PATH, "lounge*.*")):
     filename = ntpath.basename(filename).split('.')[0]
-    sprite = sge.gfx.Sprite(filename, directory="images")
+    sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
     obstacle_sprites.append(sprite)
 
 background_sprites = []
-for filename in glob.iglob("./images/wallPanel*.*"):
+for filename in glob.iglob(os.path.join(IMG_PATH, "wallPanel*.*")):
     filename = ntpath.basename(filename).split('.')[0]
-    sprite = sge.gfx.Sprite(filename, directory="images")
+    sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
     background_sprites.append(sprite)
 
 
@@ -163,19 +169,19 @@ background = sge.gfx.Background(layers, sge.gfx.Color("white"))
 
 
 # Create View
-main_view = sge.dsp.View(0, 0, width=sge.game.width)
+main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 
 # Create Objects
 objects = []
-player = Player(-300, main_view.height, move_speed=3)
-victim = Victim(ROOM_WIDTH, main_view.height)
+player = Player(-300, ROOM_HEIGHT, move_speed=3)
+victim = Victim(ROOM_WIDTH, ROOM_HEIGHT)
 
 objects.append(player)
 objects.append(victim)
 objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
-                         main_view.height - random.randrange(FLOOR_HEIGHT),
+                         ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
                          random.choice(obstacle_sprites))
-                for count in range(5)])
+                for count in range(1, 5)])
 
 # Create rooms
 main_room = Core.Room(objects,
