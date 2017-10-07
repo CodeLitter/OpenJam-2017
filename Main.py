@@ -11,9 +11,12 @@ import Core
 # Constants
 VIEW_WIDTH = 1280
 VIEW_HEIGHT = 720
-ROOM_WIDTH = 2000
+ROOM_WIDTH = VIEW_WIDTH * 2
 ROOM_HEIGHT = 720
 FLOOR_HEIGHT = 200
+WALL_HEIGHT = ROOM_HEIGHT - FLOOR_HEIGHT
+FLOOR_CENTER = WALL_HEIGHT + FLOOR_HEIGHT / 2
+
 IMG_PATH = "images"
 
 
@@ -30,19 +33,20 @@ class Player(sge.dsp.Object):
         self.image_origin_x = self.sprite.width / 2
         self.image_origin_y = self.sprite.height - 20
         self.target = pygame.math.Vector2(self.xstart, self.ystart)
-        pass
+        self.z = (self.y / 100)
 
     def event_step(self, time_passed, delta_mult):
         position = pygame.math.Vector2(self.x, self.y)
 
-        if self.sprite is self.sprite_crouch:
-            pass
-        elif sge.mouse.get_pressed("left"):
-            mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
-                                            sge.game.mouse.y)
-            if position.distance_to(mouse_vec) > self.image_width / 6:
-                self.target.x = mouse_vec.x
-                self.target.y = mouse_vec.y
+        if self.sprite is self.sprite_walk:
+            if sge.mouse.get_pressed("left"):
+                mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
+                                                sge.game.mouse.y)
+                if position.distance_to(mouse_vec) > self.image_width / 6:
+                    self.target.x = mouse_vec.x
+                    self.target.y = mouse_vec.y
+            self.z = self.y
+            
         self.target.x = Core.clamp(self.target.x,
                                    self.image_width / 2,
                                    ROOM_WIDTH - self.image_width / 2)
@@ -64,7 +68,6 @@ class Player(sge.dsp.Object):
         self.image_xscale = math.copysign(1, self.xvelocity)
         # adjust view to player's position
         sge.game.current_room.views[0].x = (self.x - sge.game.width / 4)
-        pass
 
     def toggle_crouch(self, target_x, target_y):
         if self.sprite is self.sprite_walk:
@@ -82,14 +85,20 @@ class Obstacle(sge.dsp.Object):
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
                          checks_collisions=True)
+
+    def event_create(self):
         self.bbox_x -= self.image_origin_x
         self.bbox_y -= self.image_origin_y
+        self.z = self.y
 
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
             if Core.Game.key_pressed("space"):
                 # TODO hide player
-                other.toggle_crouch(self.x, self.y)
+                target_x = self.x
+                target_y = self.y
+                other.toggle_crouch(target_x, target_y)
+                other.z = self.z + math.copysign(10, self.y - FLOOR_CENTER)
                 Core.Game.consume_key("space")
 
 
