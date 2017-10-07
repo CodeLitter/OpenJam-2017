@@ -16,7 +16,7 @@ class Player(sge.dsp.Object):
                          sge.game.height/2,
                          sprite=sprite_player,
                          image_origin_x=sprite_player.width/2,
-                         image_origin_y=sprite_player.height/2,
+                         image_origin_y=sprite_player.height - 20,
                          checks_collisions=True)
         self.move_speed = move_speed
         self._target = pygame.math.Vector2(self.xstart, self.ystart)
@@ -28,14 +28,13 @@ class Player(sge.dsp.Object):
         if sge.mouse.get_pressed("left"):
             mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
                                             sge.game.mouse.y)
-            if position.distance_to(mouse_vec) > self.image_width / 2:
+            if position.distance_to(mouse_vec) > self.image_width / 6:
                 self._target.x = mouse_vec.x
                 self._target.y = mouse_vec.y
 
-        game_offset_height = sge.game.height - self.image_height / 2
         self._target.y = Core.clamp(self._target.y,
-                                    game_offset_height - floor_height,
-                                    game_offset_height)
+                                    sge.game.height - floor_height,
+                                    sge.game.height)
         if position.distance_to(self._target) > self.move_speed + 0.1:
             direction = self.move_speed * (self._target - position).normalize()
             self.xvelocity = direction.x
