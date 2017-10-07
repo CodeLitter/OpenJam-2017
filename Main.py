@@ -94,17 +94,49 @@ class Obstacle(sge.dsp.Object):
 
 
 class Pet(sge.dsp.Object):
+    timer = 0
+    wait = 0
+    pxone = 0
+    pxtwo = 0
+    dir = 1
+    patrolling = False
 
-    def __init__(self, x, y, sprite):
-        super().__init__(x, y, sprite=sprite,
+    def __init__(self, x, y, patrol_x, wait_time):
+        super().__init__(x, y, sprite=sge.gfx.Sprite(name="victimAwake", directory="images"),
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
                          checks_collisions=True)
         self.bbox_y -= self.image_origin_x
         self.bbox_x -= self.image_origin_y
+        self.pxone = x
+        self.pxtwo = patrol_x
+        self.wait = wait_time
+        self.dir = 1 if x < patrol_x else -1
 
     def event_step(self, time_passed, delta_mult):
         # TODO if not chasing player patrol bewteen two points
+        if self.patrolling == False:
+            self.timer += 0.1
+
+        if self.timer >= self.wait:
+            # begin patrolling
+            self.patrolling = True
+            self.timer = 0
+            self.dir *= -1
+
+        if self.patrolling == True:
+            if self.dir == 1:
+                if self.x < self.pxtwo:
+                    self.xvelocity = self.dir
+                if self.x >= self.pxtwo:
+                    self.xvelocity = 0
+                    self.patrolling = False
+            elif self.dir == -1:
+                if self.x > self.pxone:
+                    self.xvelocity = self.dir
+                if self.x <= self.pxone:
+                    self.xvelocity = 0
+                    self.patrolling = False
         pass
 
     def event_collision(self, other, xdirection, ydirection):
@@ -176,9 +208,11 @@ main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 objects = []
 player = Player(-300, ROOM_HEIGHT, move_speed=3)
 victim = Victim(ROOM_WIDTH, ROOM_HEIGHT)
+pet = Pet(500, ROOM_HEIGHT, 800, 1)
 
 objects.append(player)
 objects.append(victim)
+objects.append(pet)
 objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
                          ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
                          random.choice(obstacle_sprites))
