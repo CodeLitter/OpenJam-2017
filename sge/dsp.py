@@ -1,17 +1,17 @@
 # Copyright (C) 2012-2017 Julie Marchant <onpon4@riseup.net>
-# 
+#
 # This file is part of the Pygame SGE.
-# 
+#
 # The Pygame SGE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # The Pygame SGE is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with the Pygame SGE.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -629,6 +629,9 @@ class Game(object):
                         self.project_sprite(rd["t_sprite"], 0, 0, 0)
                     else:
                         rd["t_update"] = None
+
+                # Late Update events
+                self.event_step_late(real_time_passed, delta_mult)
 
                 # Refresh
                 self.refresh()
@@ -1462,6 +1465,21 @@ class Game(object):
         """
         pass
 
+    def event_step_late(self, time_passed, delta_mult):
+        """
+        Called once each frame after every other
+        event_step is called.
+
+        Arguments:
+
+        - ``time_passed`` -- The number of milliseconds that have passed
+          during the last frame.
+        - ``delta_mult`` -- What speed and movement should be multiplied
+          by this frame due to delta timing.  If :attr:`delta` is
+          :const:`False`, this is always ``1``.
+        """
+        pass
+
     def event_alarm(self, alarm_id):
         """
         Called when the value of an alarm reaches 0.
@@ -2071,7 +2089,7 @@ class Room(object):
                 area |= self.object_areas[a[0]][a[1]]
 
         return area
-            
+
 
     def project_dot(self, x, y, z, color, blend_mode=None):
         """
