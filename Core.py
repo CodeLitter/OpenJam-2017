@@ -23,9 +23,8 @@ class Room(sge.dsp.Room):
         self._font = font
 
     def event_step(self, time_passed, delta_mult):
-        sge.game.project_text(self._font, "Hello, world!",
-                              sge.game.width / 2,
-                              sge.game.height / 2,
+        sge.game.project_text(self._font, str(1000 / time_passed),
+                              self._font.size, self._font.size,
                               color=sge.gfx.Color("black"), halign="center",
                               valign="middle")
         pass

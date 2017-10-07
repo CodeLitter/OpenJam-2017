@@ -6,9 +6,14 @@ import Core
 
 class Player(sge.dsp.Object):
 
-    def __init__(self, speed=1):
-        super().__init__(0, 0, sprite=sprite_player, checks_collisions=True)
-        self.speed = speed
+    def __init__(self, move_speed=1):
+        super().__init__(sge.game.width/2,
+                         sge.game.height/2,
+                         sprite=sprite_player,
+                         image_origin_x=sprite_player.width/2,
+                         image_origin_y=sprite_player.height/2,
+                         checks_collisions=True)
+        self.move_speed = move_speed
         self._target = pygame.math.Vector2(self.xstart, self.ystart)
 
     def event_step(self, time_passed, delta_mult):
@@ -17,14 +22,32 @@ class Player(sge.dsp.Object):
             self._target.y = sge.game.mouse.y
 
         position = pygame.math.Vector2(self.x, self.y)
-        if (self._target.distance_to(position) > self.speed + 0.1):
-            direction = self.speed * (self._target - position).normalize()
+        if (self._target.distance_to(position) > self.move_speed + 0.1):
+            direction = self.move_speed * (self._target - position).normalize()
             self.xvelocity = direction.x
             self.yvelocity = direction.y
+            self.image_speed = self.move_speed * (time_passed / 1000)
         else:
-            self.x = self._target.x
-            self.y = self._target.y
+            self.xvelocity = 0
+            self.yvelocity = 0
+            self.image_speed = 0
+            self.image_index = 0
+        sge.game.current_room.views[0].x = (self.x - sge.game.width/2)
+        pass
 
+
+class Goal(sge.dsp.Object):
+
+    def __init__(self):
+        super().__init__(sge.game.width/2,
+                         sge.game.height/2,
+                         sprite=sprite_goal,
+                         image_origin_x=sprite_goal.width/2,
+                         image_origin_y=sprite_goal.height/2,
+                         checks_collisions=True)
+        pass
+
+    def event_step(self, time_passed, delta_mult):
         pass
 
 
@@ -32,27 +55,37 @@ class Player(sge.dsp.Object):
 Core.Game(width=1280, height=720, fps=60, window_text="Leave a mark")
 
 # Create backgrounds
-background = sge.gfx.Background([], sge.gfx.Color("white"))
+background_sprites = sge.gfx.Sprite("victimAsleep", directory="images")
+layer = sge.gfx.BackgroundLayer(background_sprites, 0, 0, repeat_right=True)
+background = sge.gfx.Background([layer], sge.gfx.Color("white"))
 
 # Load fonts
 
 # Load Sprite
-sprite_player = sge.gfx.Sprite(name="SingleNosferatu",
-                               directory="images",
-                               origin_x=128,
-                               origin_y=128)
+sprite_player = sge.gfx.Sprite(name="vampWalk",
+                               directory="images")
+
+sprite_goal = sge.gfx.Sprite(name="victimAsleep",
+                             directory="images")
+
+# Create View
+main_view = sge.dsp.View(0, 0,
+                         width=sge.game.width)
 
 # Create Player
-player = Player()
+player = Player(5)
 
-objects = [player]
+objects = [player, Goal()]
 
 # Create rooms
-main_room = Core.Room(objects, background=background)
+main_room = Core.Room(objects,
+                      views=[main_view],
+                      width=sge.game.width * 2,
+                      background=background)
 main_room.font = sge.gfx.Font()
 sge.game.start_room = main_room
 
-#sge.game.mouse.visible = False
+# sge.game.mouse.visible = False
 
 if __name__ == "__main__":
     sge.game.start()
