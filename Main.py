@@ -14,7 +14,8 @@ class Player(sge.dsp.Object):
         super().__init__(x, y, sprite=sprite_player,
                          image_origin_x=sprite_player.width/2,
                          image_origin_y=sprite_player.height - 20,
-                         checks_collisions=True)
+                         checks_collisions=True,
+                         collision_precise=True)
         self.move_speed = move_speed
         self._target = pygame.math.Vector2(self.xstart, self.ystart)
 
@@ -25,7 +26,7 @@ class Player(sge.dsp.Object):
         if sge.keyboard.get_pressed("space"):
             randomize_layers(layers)
         # End Debug
-        
+
         if sge.mouse.get_pressed("left"):
             mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
                                             sge.game.mouse.y)
@@ -53,17 +54,21 @@ class Player(sge.dsp.Object):
         pass
 
 
-class Goal(sge.dsp.Object):
+class Victim(sge.dsp.Object):
 
-    def __init__(self, x, y):
-        super().__init__(x, y, sprite=sprite_goal,
-                         image_origin_x=sprite_goal.width,
-                         image_origin_y=sprite_goal.height,
-                         checks_collisions=True)
-        pass
+    def __init__(self, x, y, sprite):
+        super().__init__(x, y, sprite=sprite,
+                         image_origin_x=sprite.width,
+                         image_origin_y=sprite.height,
+                         checks_collisions=True,
+                         collision_precise=True)
+    pass
 
-    def event_step(self, time_passed, delta_mult):
-        pass
+    def event_collision(self, other, xdirection, ydirection):
+        if type(other) is Player:
+            print(other)
+            # sge.game.event_close()
+            pass
 
 
 # Create Game object
@@ -74,8 +79,8 @@ FLOOR_HEIGHT = 200
 # Load Sprite
 sprite_player = sge.gfx.Sprite(name="vampWalk",
                                directory="images")
-sprite_goal = sge.gfx.Sprite(name="victimAsleep",
-                             directory="images")
+sprite_victim = sge.gfx.Sprite(name="victimAsleep",
+                               directory="images")
 background_sprites = []
 for filename in glob.iglob("./images/wallPanel*.*"):
     filename = ntpath.basename(filename).split('.')[0]
@@ -109,7 +114,8 @@ main_view = sge.dsp.View(0, 0, width=sge.game.width)
 # Create Player
 player = Player(-sprite_player.width, main_view.height, move_speed=3)
 
-objects = [player, Goal(ROOM_WIDTH, main_view.height)]
+objects = [player,
+           Victim(ROOM_WIDTH, main_view.height, sprite_victim)]
 
 # Create rooms
 main_room = Core.Room(objects,
