@@ -2,6 +2,10 @@
 import sge
 
 
+def clamp(number, low, high):
+    return max(low, min(high, number))
+
+
 class Game(sge.dsp.Game):
 
     def event_key_press(self, key, char):

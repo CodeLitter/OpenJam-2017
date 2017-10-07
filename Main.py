@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sge
 import pygame.math
+import math
 import Core
 
 
@@ -17,12 +18,19 @@ class Player(sge.dsp.Object):
         self._target = pygame.math.Vector2(self.xstart, self.ystart)
 
     def event_step(self, time_passed, delta_mult):
-        if sge.mouse.get_pressed("left"):
-            self._target.x = sge.game.mouse.x
-            self._target.y = sge.game.mouse.y
-
         position = pygame.math.Vector2(self.x, self.y)
-        if (self._target.distance_to(position) > self.move_speed + 0.1):
+        floor_height = 200
+
+        if sge.mouse.get_pressed("left"):
+            mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
+                                            sge.game.mouse.y)
+            if position.distance_to(mouse_vec) > self.image_width / 2:
+                self._target.x = sge.game.mouse.x
+                self._target.y = Core.clamp(mouse_vec.y,
+                                            sge.game.height - floor_height,
+                                            sge.game.height) - self.image_height / 2
+
+        if position.distance_to(self._target) > self.move_speed + 0.1:
             direction = self.move_speed * (self._target - position).normalize()
             self.xvelocity = direction.x
             self.yvelocity = direction.y
@@ -32,7 +40,8 @@ class Player(sge.dsp.Object):
             self.yvelocity = 0
             self.image_speed = 0
             self.image_index = 0
-        sge.game.current_room.views[0].x = (self.x - sge.game.width/2)
+        self.image_xscale = math.copysign(1, self.xvelocity)
+        sge.game.current_room.views[0].x = (self.x - sge.game.width / 2)
         pass
 
 
@@ -55,7 +64,7 @@ class Goal(sge.dsp.Object):
 Core.Game(width=1280, height=720, fps=60, window_text="Leave a mark")
 
 # Create backgrounds
-background_sprites = sge.gfx.Sprite("victimAsleep", directory="images")
+background_sprites = sge.gfx.Sprite("wallPanel", directory="images")
 layer = sge.gfx.BackgroundLayer(background_sprites, 0, 0, repeat_right=True)
 background = sge.gfx.Background([layer], sge.gfx.Color("white"))
 
