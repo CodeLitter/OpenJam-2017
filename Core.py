@@ -21,6 +21,10 @@ class Game(sge.dsp.Game):
             Game.keys[key] = False
         return Game.keys[key]
 
+    @staticmethod
+    def consume_key(key):
+        Game.keys[key] = False
+
     def __init__(self, width=640, height=480, fullscreen=False, scale=None,
                  scale_proportional=True, scale_method=None, fps=60,
                  delta=False, delta_min=15, delta_max=None, grab_input=False,

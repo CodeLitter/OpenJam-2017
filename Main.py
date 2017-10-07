@@ -90,6 +90,7 @@ class Obstacle(sge.dsp.Object):
             if Core.Game.key_pressed("space"):
                 # TODO hide player
                 other.toggle_crouch(self.x, self.y)
+                Core.Game.consume_key("space")
 
 
 class Pet(sge.dsp.Object):
