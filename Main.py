@@ -89,9 +89,13 @@ class Pet(sge.dsp.Object):
         self.bbox_y -= self.image_origin_x
         self.bbox_x -= self.image_origin_y
 
+    def event_step(self, time_passed, delta_mult):
+        # TODO if not chasing player patrol bewteen two points
+        pass
+
     def event_collision(self, other, xdirection, ydirection):
         if type(other) is Player:
-            # TODO game over
+            # TODO game over if player is not hidden
             pass
 
 
@@ -117,6 +121,7 @@ ROOM_WIDTH = sge.game.width * 2
 FLOOR_HEIGHT = 200
 
 # Load Sprite
+# TODO find out the order of sprite drawing
 sprite_player_walk = sge.gfx.Sprite(name="vampWalk",
                                     directory="images")
 sprite_player_crouch = sge.gfx.Sprite(name="vampCrouch",
