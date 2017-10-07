@@ -11,17 +11,22 @@ import Core
 class Player(sge.dsp.Object):
 
     def __init__(self, x, y, move_speed=1):
-        super().__init__(x, y, sprite=sprite_player_walk,
-                         image_origin_x=sprite_player_walk.width/2,
-                         image_origin_y=sprite_player_walk.height - 20,
-                         collision_precise=True)
+        super().__init__(x, y, collision_precise=True)
         self.move_speed = move_speed
+
+    def event_create(self):
+        self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory="images")
+        self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch", directory="images")
+        self.sprite = self.sprite_walk
+        self.image_origin_x = self.sprite.width / 2
+        self.image_origin_y = self.sprite.height - 20
         self.target = pygame.math.Vector2(self.xstart, self.ystart)
+        pass
 
     def event_step(self, time_passed, delta_mult):
         position = pygame.math.Vector2(self.x, self.y)
 
-        if self.sprite is sprite_player_crouch:
+        if self.sprite is self.sprite_crouch:
             pass
         elif sge.mouse.get_pressed("left"):
             mouse_vec = pygame.math.Vector2(sge.game.mouse.x,
@@ -53,12 +58,12 @@ class Player(sge.dsp.Object):
         pass
 
     def toggle_crouch(self, target_x, target_y):
-        if self.sprite is sprite_player_walk:
-            self.sprite = sprite_player_crouch
+        if self.sprite is self.sprite_walk:
+            self.sprite = self.sprite_crouch
             self.target.x = target_x
             self.target.y = target_y
         else:
-            self.sprite = sprite_player_walk
+            self.sprite = self.sprite_walk
 
 
 class Obstacle(sge.dsp.Object):
@@ -67,8 +72,7 @@ class Obstacle(sge.dsp.Object):
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
-                         checks_collisions=True,
-                         collision_ellipse=True)
+                         checks_collisions=True)
         self.bbox_y -= self.image_origin_x
         self.bbox_x -= self.image_origin_y
 
@@ -101,13 +105,22 @@ class Pet(sge.dsp.Object):
 
 class Victim(sge.dsp.Object):
 
-    def __init__(self, x, y, sprite):
-        super().__init__(x, y, sprite=sprite,
-                         image_origin_x=sprite.width,
-                         image_origin_y=sprite.height,
-                         checks_collisions=True)
+    def __init__(self, x, y):
+        super().__init__(x, y, checks_collisions=True)
+
+    def event_create(self):
+        print("event create")
+        self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory="images")
+        # self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory="images")
+        self.sprite = self.sprite_asleep
+        self.image_origin_x = self.sprite.width
+        self.image_origin_y = self.sprite.height
         self.bbox_y -= self.image_origin_x
         self.bbox_x -= self.image_origin_y
+
+    def event_step(self, time_passed, delta_mult):
+        # TODO when timer runs out wake victim
+        pass
 
     def event_collision(self, other, xdirection, ydirection):
         if type(other) is Player:
@@ -122,12 +135,6 @@ FLOOR_HEIGHT = 200
 
 # Load Sprite
 # TODO find out the order of sprite drawing
-sprite_player_walk = sge.gfx.Sprite(name="vampWalk",
-                                    directory="images")
-sprite_player_crouch = sge.gfx.Sprite(name="vampCrouch",
-                                      directory="images")
-sprite_victim = sge.gfx.Sprite(name="victimAsleep",
-                               directory="images")
 
 obstacle_sprites = []
 for filename in glob.iglob("./images/tableWquill*.*"):
@@ -160,8 +167,8 @@ main_view = sge.dsp.View(0, 0, width=sge.game.width)
 
 # Create Objects
 objects = []
-player = Player(-sprite_player_walk.width, main_view.height, move_speed=3)
-victim = Victim(ROOM_WIDTH, main_view.height, sprite_victim)
+player = Player(-300, main_view.height, move_speed=3)
+victim = Victim(ROOM_WIDTH, main_view.height)
 
 objects.append(player)
 objects.append(victim)
