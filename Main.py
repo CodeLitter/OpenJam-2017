@@ -66,8 +66,7 @@ class Victim(sge.dsp.Object):
 
     def event_collision(self, other, xdirection, ydirection):
         if type(other) is Player:
-            print(other)
-            # sge.game.event_close()
+            # TODO end level
             pass
 
 
