@@ -60,9 +60,25 @@ class Room(sge.dsp.Room):
     def font(self, font):
         self._font = font
 
+    def __init__(self, objects=(), width=None, height=None, views=None,
+                 background=None, background_x=0, background_y=0,
+                 object_area_width=None, object_area_height=None, timer=60):
+        super().__init__(objects, width, height, views,
+                         background, background_x, background_y,
+                         object_area_width, object_area_height)
+        self.timer = timer * 1000
+        pass
+
+    def event_room_start(self):
+        self.sprite_timer = sge.gfx.Sprite(name="timerBG",
+                                           directory="images")
+
     def event_step(self, time_passed, delta_mult):
-        sge.game.project_text(self._font, str(1000 / time_passed),
-                              self._font.size, self._font.size,
-                              color=sge.gfx.Color("black"), halign="left",
+        sge.game.project_sprite(self.sprite_timer, 0, 0, 0)
+        sge.game.project_text(self._font, str(self.timer / 1000),
+                              self.sprite_timer.width / 2,
+                              self.sprite_timer.height / 2,
+                              color=sge.gfx.Color("white"), halign="left",
                               valign="middle")
+        self.timer -= time_passed
         pass
