@@ -46,7 +46,7 @@ class Player(sge.dsp.Object):
                     self.target.x = mouse_vec.x
                     self.target.y = mouse_vec.y
             self.z = self.y
-            
+
         self.target.x = Core.clamp(self.target.x,
                                    self.image_width / 2,
                                    ROOM_WIDTH - self.image_width / 2)
@@ -115,8 +115,8 @@ class Pet(sge.dsp.Object):
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
                          checks_collisions=True)
-        self.bbox_y -= self.image_origin_x
-        self.bbox_x -= self.image_origin_y
+        self.bbox_y = -self.image_origin_x
+        self.bbox_x = -self.image_origin_y
         self.pxone = x
         self.pxtwo = patrol_x
         self.wait = wait_time
@@ -157,25 +157,30 @@ class Pet(sge.dsp.Object):
 class Victim(sge.dsp.Object):
 
     def __init__(self, x, y):
-        super().__init__(x, y, checks_collisions=True)
+        super().__init__(x, y, checks_collisions=True, collision_precise=True)
 
     def event_create(self):
         self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory=IMG_PATH)
-        # self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory=IMG_PATH)
+        self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory=IMG_PATH)
         self.sprite = self.sprite_asleep
         self.image_origin_x = self.sprite.width
         self.image_origin_y = self.sprite.height
-        self.bbox_y -= self.image_origin_x
-        self.bbox_x -= self.image_origin_y
+        self.bbox_x = -self.image_origin_x
+        self.bbox_y = -self.image_origin_y
+        self.bbox_width = self.sprite.width
+        self.bbox_height = self.sprite.height
+        self.z = self.y
 
     def event_step(self, time_passed, delta_mult):
         # TODO when timer runs out wake victim
-        pass
+        if sge.game.current_room.timer <= 0:
+            self.sprite = self.sprite_awake
 
     def event_collision(self, other, xdirection, ydirection):
-        if type(other) is Player:
+        if isinstance(other, Player):
             # TODO end level
-            pass
+            print(sge.game.current_room.timer)
+            sge.game.current_room.reset()
 
 
 # Create Game object
@@ -231,7 +236,8 @@ objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
 main_room = Core.Room(objects,
                       views=[main_view],
                       width=ROOM_WIDTH,
-                      background=background)
+                      background=background,
+                      timer=60)
 main_room.font = sge.gfx.Font()
 sge.game.start_room = main_room
 
