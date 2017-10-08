@@ -7,9 +7,9 @@ You're a vampire who lives in the basement of a hotel.  The hotel owners realize
 Attributions:
 =====
 Scripting Language
-  * [Python]
+  * [Python](https://www.python.org/)
   
-External Libraries/Enginees
+External Libraries/Engines
   * [Pygame](https://www.pygame.org/)
   * [SGE](http://stellarengine.nongnu.org/)
   
