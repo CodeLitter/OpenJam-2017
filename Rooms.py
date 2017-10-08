@@ -1,11 +1,12 @@
 import sge
 import pygame.mixer
 import os
+import glob
 import json
 import Core
 
 
-def build_room(path, **kwargs):
+def create_room(path, **kwargs):
     with open(path) as file:
         attributes = json.load(file)
         type_name = next(iter(attributes))
@@ -37,7 +38,13 @@ class PlayArea(sge.dsp.Room):
         self.sprite_timer = sge.gfx.Sprite(name="timerBG",
                                            directory="images")
         self.play_song(os.path.join(Core.SND_PATH, "Anxiety.ogg"))
-        # TODO create objects from json file
+
+        background_sprites = []
+        for path in glob.iglob(os.path.join(Core.IMG_PATH, "wallPanel*.*")):
+            filename = os.path.splitext(os.path.basename(path))[0]
+            sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
+            background_sprites.append(sprite)
+        Core.randomize_layers(self.background.layers, background_sprites)
 
     def event_step(self, time_passed, delta_mult):
         sge.game.project_sprite(self.sprite_timer, 0, 0, 0)

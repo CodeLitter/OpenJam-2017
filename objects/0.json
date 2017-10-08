@@ -1,0 +1,21 @@
+{
+	"Player": {
+		"x": -200,
+		"y": 720,
+		"move_speed": 3
+	},
+	"Pet": {
+		"x": 1026,
+		"y": 620,
+		"domain": 600
+	},
+	"Obstacle": {
+		"x": 1326,
+		"y": 520,
+		"sprite_name": "obstacle_chair"
+	},
+	"Victim": {
+		"x": 2652,
+		"y": 720
+	}
+}

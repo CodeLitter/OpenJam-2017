@@ -2,6 +2,6 @@
 	"PlayArea": {
 		"width": 2562,
 		"height": 720,
-		"timer": 600
+		"timer": 60
 	}
 }

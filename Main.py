@@ -6,6 +6,7 @@ import glob
 import ntpath
 import os
 import random
+import json
 import Core
 import Rooms
 
@@ -19,6 +20,16 @@ FLOOR_HEIGHT = 200
 WALL_HEIGHT = ROOM_HEIGHT - FLOOR_HEIGHT
 FLOOR_CENTER = WALL_HEIGHT + FLOOR_HEIGHT / 2
 IMAGE_SPEED_FACTOR = 5
+
+
+def create_objects(path):
+    with open(path) as file:
+        attributes = json.load(file)
+        objects = []
+        for _type in attributes:
+            obj = eval(_type)(**attributes[_type])
+            objects.append(obj)
+        return objects
 
 
 class Player(sge.dsp.Object):
@@ -93,7 +104,14 @@ class Player(sge.dsp.Object):
 
 class Obstacle(sge.dsp.Object):
 
-    def __init__(self, x, y, sprite):
+    sprites = {}
+
+    def __init__(self, x, y, sprite_name):
+        if sprite_name not in Obstacle.sprites:
+            sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
+            Obstacle.sprites[sprite_name] = sprite
+        else:
+            sprite = Obstacle.sprites[sprite_name]
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
@@ -117,8 +135,14 @@ class Obstacle(sge.dsp.Object):
 
 class Pet(sge.dsp.Object):
 
-    def __init__(self, x, y, domain, turn_delay=1, move_speed=1):
-        sprite = sge.gfx.Sprite(name="catWalk", directory=Core.IMG_PATH)
+    sprites = {}
+
+    def __init__(self, x, y, domain, sprite_name="catWalk", turn_delay=1, move_speed=1):
+        if sprite_name not in Obstacle.sprites:
+            sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
+            Obstacle.sprites[sprite_name] = sprite
+        else:
+            sprite = Obstacle.sprites[sprite_name]
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
@@ -176,8 +200,8 @@ class Victim(sge.dsp.Object):
 
     _SLEEP_DELAY = 5
 
-    def __init__(self, x, y, player):
-        self.player = player
+    def __init__(self, x, y):
+        self.player = None
         super().__init__(x, y, checks_collisions=True, collision_precise=True)
 
     def event_create(self):
@@ -185,6 +209,9 @@ class Victim(sge.dsp.Object):
                                             directory=Core.IMG_PATH)
         self.sprite_awake = sge.gfx.Sprite(name="victimAwake",
                                            directory=Core.IMG_PATH)
+        self.player = next(filter(lambda x: isinstance(x, Player),
+                                  sge.game.current_room.objects),
+                           None)
         self.sprite = self.sprite_asleep
         self.image_origin_x = self.sprite.width
         self.image_origin_y = self.sprite.height
@@ -233,53 +260,55 @@ def main():
     #           scale=1)
 
     # Load Sprite
-    obstacle_sprites = []
-    for filename in glob.iglob(os.path.join(Core.IMG_PATH, "obstacle_*.*")):
-        filename = ntpath.basename(filename).split('.')[0]
-        sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
-        obstacle_sprites.append(sprite)
+    # obstacle_sprites = []
+    # for filename in glob.iglob(os.path.join(Core.IMG_PATH, "obstacle_*.*")):
+    #     filename = ntpath.basename(filename).split('.')[0]
+    #     sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
+    #     obstacle_sprites.append(sprite)
 
-    background_sprites = []
-    for filename in glob.iglob(os.path.join(Core.IMG_PATH, "wallPanel*.*")):
-        filename = ntpath.basename(filename).split('.')[0]
-        sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
-        background_sprites.append(sprite)
+    # background_sprites = []
+    # for filename in glob.iglob(os.path.join(Core.IMG_PATH, "wallPanel*.*")):
+    #     filename = ntpath.basename(filename).split('.')[0]
+    #     sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
+    #     background_sprites.append(sprite)
 
     # Create backgrounds
     layers = []
-    for offset in range(int(ROOM_WIDTH / background_sprites[0].width)):
-        layer = sge.gfx.BackgroundLayer(None, offset * sprite.width, 0)
+    for offset in range(int(ROOM_WIDTH / 320)):
+        layer = sge.gfx.BackgroundLayer(None, offset * 320, 0)
         layers.append(layer)
-
-    Core.randomize_layers(layers, background_sprites)
 
     background = sge.gfx.Background(layers, sge.gfx.Color("white"))
 
     # Load fonts
+    font = sge.gfx.Font()
 
     # Create Objects
-    objects = []
-    player = Player(x=-300, y=ROOM_HEIGHT, move_speed=3)
-    victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
-    pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
+    # player = Player(x=-300, y=ROOM_HEIGHT, move_speed=3)
+    # victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
+    # pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
 
-    objects.append(player)
-    objects.append(victim)
-    objects.append(pet)
-    objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
-                             ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
-                             random.choice(obstacle_sprites))
-                    for count in range(1, 5)])
+    # objects.append(player)
+    # objects.append(victim)
+    # objects.append(pet)
+    # objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
+    #                          ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
+    #                          random.choice(obstacle_sprites))
+    #                 for count in range(1, 5)])
 
     # Create rooms
-    # For each config found create associated room
-    font = sge.gfx.Font()
-    room = Rooms.build_room(os.path.join("rooms", "0.json"),
-                            font=font,
-                            objects=objects,
-                            views=[sge.game.view],
-                            background=background)
-    sge.game.rooms.append(room)
+    for path in glob.iglob(os.path.join("rooms", "*.json")):
+        filename = os.path.basename(path)
+        objects = create_objects(os.path.join("objects", filename))
+        room = Rooms.create_room(path, font=font, objects=objects,
+                                 views=[sge.game.view], background=background)
+        sge.game.rooms.append(room)
+
+
+    # sge.game.rooms
+    #
+    # # For each config found create associated room
+    # sge.game.rooms.append(room)
 
     sge.game.start_room = sge.game.next_room()
 
