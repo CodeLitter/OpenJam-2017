@@ -184,7 +184,11 @@ class Victim(sge.dsp.Object):
 
 
 # Create Game object
-Core.Game(width=VIEW_WIDTH, height=VIEW_HEIGHT, fps=60, window_text="Leave a mark")
+Core.Game(width=VIEW_WIDTH,
+          height=VIEW_HEIGHT,
+          fps=60,
+          window_text="Leave a mark",
+          scale=1)
 
 # Load Sprite
 # TODO find out the order of sprite drawing
