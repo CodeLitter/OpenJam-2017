@@ -7,11 +7,11 @@ You're a vampire who lives in the basement of a hotel.  The hotel owners realize
 Attributions:
 =====
 Scripting Language
-  * Python
+  * [Python]
   
 External Libraries/Enginees
-  * Pygame:  https://www.pygame.org/
-  * SGE:     http://stellarengine.nongnu.org/
+  * [Pygame](https://www.pygame.org/)
+  * [SGE](http://stellarengine.nongnu.org/)
   
 Art:
   * Textures.com
@@ -36,3 +36,10 @@ Art:
     * [Child Silhouette](http://www.loc.gov/pictures/item/2015650344/)
     * [Self Portrait](https://openclipart.org/detail/219600/self-portrait-in-a-straw-hat-by-elisabeth-louise-vigee-lebrun)
  
+ Sounds:
+  * Incompetech
+    * ["Anxiety"](http://incompetech.com/music/royalty-free/?keywords=anxiety) by Kevin MacLeod (incompetech.com)
+      Licensed under Creative Commons: By Attribution 3.0 License
+      http://creativecommons.org/licenses/by/3.0/
+  * SoundBible
+    * [TomCat](http://soundbible.com/1687-TomCat.html) by Mr Smith
