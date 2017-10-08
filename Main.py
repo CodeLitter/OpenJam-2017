@@ -16,7 +16,7 @@ ROOM_HEIGHT = 720
 FLOOR_HEIGHT = 200
 WALL_HEIGHT = ROOM_HEIGHT - FLOOR_HEIGHT
 FLOOR_CENTER = WALL_HEIGHT + FLOOR_HEIGHT / 2
-
+IMAGE_SPEED_FACTOR = 5
 IMG_PATH = "images"
 
 
@@ -26,6 +26,9 @@ class Player(sge.dsp.Object):
         super().__init__(x, y, collision_precise=True)
         self.move_speed = move_speed
 
+    def is_hidden(self):
+        return self.sprite is self.sprite_crouch
+
     def event_create(self):
         self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory=IMG_PATH)
         self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch", directory=IMG_PATH)
@@ -33,7 +36,7 @@ class Player(sge.dsp.Object):
         self.image_origin_x = self.sprite.width / 2
         self.image_origin_y = self.sprite.height - 20
         self.target = pygame.math.Vector2(self.xstart, self.ystart)
-        self.z = (self.y / 100)
+        self.z = self.y
 
     def event_step(self, time_passed, delta_mult):
         position = pygame.math.Vector2(self.x, self.y)
@@ -103,54 +106,83 @@ class Obstacle(sge.dsp.Object):
 
 
 class Pet(sge.dsp.Object):
-    timer = 0
-    wait = 0
-    pxone = 0
-    pxtwo = 0
-    dir = 1
-    patrolling = False
+    # timer = 0
+    # wait = 0
+    # x_begin = 0
+    # x_end = 0
+    # dir = 1
+    # patrolling = False
 
-    def __init__(self, x, y, patrol_x, wait_time):
-        super().__init__(x, y, sprite=sge.gfx.Sprite(name="victimAwake", directory="images"),
+    def __init__(self, x, y, domain, turn_delay=1, move_speed=1):
+        sprite = sge.gfx.Sprite(name="catWalk", directory=IMG_PATH)
+        super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
                          checks_collisions=True)
-        self.bbox_y = -self.image_origin_x
-        self.bbox_x = -self.image_origin_y
-        self.pxone = x
-        self.pxtwo = patrol_x
-        self.wait = wait_time
-        self.dir = 1 if x < patrol_x else -1
+        self.timer = 0
+        self.domain = domain
+        self.wait = turn_delay
+        self.move_speed = move_speed
+
+    def event_create(self):
+        self.bbox_x = -self.image_origin_x
+        self.bbox_y = -self.image_origin_y
+        x_calc = self.x + self.domain
+        self.x_begin = min(self.x, x_calc)
+        self.x_end = max(self.x, x_calc)
+        self.patrolling = True
+        self.z = self.y
+        # self.dir = 1 if x < patrol_x else -1
 
     def event_step(self, time_passed, delta_mult):
         # TODO if not chasing player patrol bewteen two points
-        if self.patrolling == False:
-            self.timer += 0.1
-
-        if self.timer >= self.wait:
-            # begin patrolling
-            self.patrolling = True
-            self.timer = 0
-            self.dir *= -1
-
-        if self.patrolling == True:
-            if self.dir == 1:
-                if self.x < self.pxtwo:
-                    self.xvelocity = self.dir
-                if self.x >= self.pxtwo:
+        self.image_speed = IMAGE_SPEED_FACTOR * self.xvelocity * (time_passed / 1000)
+        self.image_xscale = math.copysign(1, -self.xvelocity)
+        if self.patrolling:
+            if self.x <= self.x_begin or self.x >= self.x_end:
+                if self.timer < self.wait:
+                    self.timer += time_passed / 1000
+                    self.x = Core.clamp(self.x, self.x_begin, self.x_end)
                     self.xvelocity = 0
-                    self.patrolling = False
-            elif self.dir == -1:
-                if self.x > self.pxone:
-                    self.xvelocity = self.dir
-                if self.x <= self.pxone:
-                    self.xvelocity = 0
-                    self.patrolling = False
-        pass
+                    self.image_index = 0
+                else:
+                    self.move_speed = -self.move_speed
+                    self.xvelocity = self.move_speed
+                    self.timer = 0
+        else:
+            pass
+
+        #
+        # if not self.patrolling:
+        #     self.timer += 0.1
+        #
+        # if self.timer >= self.wait:
+        #     # begin patrolling
+        #     self.patrolling = True
+        #     self.timer = 0
+        #     self.dir *= -1
+        #
+        # if self.patrolling:
+        #     if self.dir == 1:
+        #         if self.x < self.x_end:
+        #             self.xvelocity = self.dir
+        #         if self.x >= self.x_end:
+        #             self.xvelocity = 0
+        #             self.patrolling = False
+        #     elif self.dir == -1:
+        #         if self.x > self.x_begin:
+        #             self.xvelocity = self.dir
+        #         if self.x <= self.x_begin:
+        #             self.xvelocity = 0
+        #             self.patrolling = False
+        # pass
 
     def event_collision(self, other, xdirection, ydirection):
-        if type(other) is Player:
+        if isinstance(other, Player):
             # TODO game over if player is not hidden
+            if not other.is_hidden():
+                sge.game.current_room.reset()
+
             pass
 
 
@@ -194,7 +226,7 @@ Core.Game(width=VIEW_WIDTH,
 # TODO find out the order of sprite drawing
 
 obstacle_sprites = []
-for filename in glob.iglob(os.path.join(IMG_PATH, "lounge*.*")):
+for filename in glob.iglob(os.path.join(IMG_PATH, "obstacle_*.*")):
     filename = ntpath.basename(filename).split('.')[0]
     sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
     obstacle_sprites.append(sprite)
@@ -226,7 +258,7 @@ main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 objects = []
 player = Player(-300, ROOM_HEIGHT, move_speed=3)
 victim = Victim(ROOM_WIDTH, ROOM_HEIGHT)
-pet = Pet(500, ROOM_HEIGHT, 800, 1)
+pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
 
 objects.append(player)
 objects.append(victim)
