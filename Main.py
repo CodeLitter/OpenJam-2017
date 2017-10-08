@@ -26,10 +26,11 @@ class Player(sge.dsp.Object):
         super().__init__(x, y, collision_precise=True)
         self.move_speed = move_speed
 
-
     def event_create(self):
-        self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory=IMG_PATH)
-        self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch", directory=IMG_PATH)
+        self.sprite_walk = sge.gfx.Sprite(name="vampWalk",
+                                          directory=IMG_PATH)
+        self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch",
+                                            directory=IMG_PATH)
         self.sprite = self.sprite_walk
         self.image_origin_x = self.sprite.width / 2
         self.image_origin_y = self.sprite.height - 20
@@ -168,6 +169,7 @@ class Pet(sge.dsp.Object):
         self.yvelocity = 0
         self.timer = 0
 
+
 class Victim(sge.dsp.Object):
 
     _SLEEP_DELAY = 5
@@ -175,7 +177,6 @@ class Victim(sge.dsp.Object):
     def __init__(self, x, y, player):
         self.player = player
         super().__init__(x, y, checks_collisions=True, collision_precise=True)
-
 
     def event_create(self):
         self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory=IMG_PATH)
@@ -200,7 +201,8 @@ class Victim(sge.dsp.Object):
                 sge.game.current_room.timer = sge.game.current_room.start_timer
         if self.sprite is self.sprite_awake:
             if not self.player.is_hidden():
-                sge.game.current_room.reset()
+                if abs(self.x - self.player.x) < main_view.width:
+                    sge.game.current_room.reset()
 
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
@@ -209,6 +211,7 @@ class Victim(sge.dsp.Object):
 
     def reset(self):
         self.sprite = self.sprite_asleep
+
 
 # Create Game object
 Core.Game(width=VIEW_WIDTH,
