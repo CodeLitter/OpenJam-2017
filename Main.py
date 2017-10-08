@@ -26,8 +26,6 @@ class Player(sge.dsp.Object):
         super().__init__(x, y, collision_precise=True)
         self.move_speed = move_speed
 
-    def is_hidden(self):
-        return self.sprite is self.sprite_crouch
 
     def event_create(self):
         self.sprite_walk = sge.gfx.Sprite(name="vampWalk", directory=IMG_PATH)
@@ -72,6 +70,9 @@ class Player(sge.dsp.Object):
         # adjust view to player's position
         sge.game.current_room.views[0].x = (self.x - sge.game.width / 4)
 
+    def is_hidden(self):
+        return self.sprite is self.sprite_crouch
+
     def toggle_crouch(self, target_x, target_y):
         if self.sprite is self.sprite_walk:
             self.sprite = self.sprite_crouch
@@ -79,6 +80,13 @@ class Player(sge.dsp.Object):
             self.target.y = target_y
         else:
             self.sprite = self.sprite_walk
+
+    def reset(self):
+        self.x = self.xstart
+        self.y = self.ystart
+        self.xvelocity = 0
+        self.yvelocity = 0
+        self.target = pygame.math.Vector2(0, 0)
 
 
 class Obstacle(sge.dsp.Object):
@@ -106,19 +114,14 @@ class Obstacle(sge.dsp.Object):
 
 
 class Pet(sge.dsp.Object):
-    # timer = 0
-    # wait = 0
-    # x_begin = 0
-    # x_end = 0
-    # dir = 1
-    # patrolling = False
 
     def __init__(self, x, y, domain, turn_delay=1, move_speed=1):
         sprite = sge.gfx.Sprite(name="catWalk", directory=IMG_PATH)
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
-                         checks_collisions=True)
+                         checks_collisions=True,
+                         collision_precise=True)
         self.timer = 0
         self.domain = domain
         self.wait = turn_delay
@@ -132,7 +135,6 @@ class Pet(sge.dsp.Object):
         self.x_end = max(self.x, x_calc)
         self.patrolling = True
         self.z = self.y
-        # self.dir = 1 if x < patrol_x else -1
 
     def event_step(self, time_passed, delta_mult):
         # TODO if not chasing player patrol bewteen two points
@@ -152,44 +154,28 @@ class Pet(sge.dsp.Object):
         else:
             pass
 
-        #
-        # if not self.patrolling:
-        #     self.timer += 0.1
-        #
-        # if self.timer >= self.wait:
-        #     # begin patrolling
-        #     self.patrolling = True
-        #     self.timer = 0
-        #     self.dir *= -1
-        #
-        # if self.patrolling:
-        #     if self.dir == 1:
-        #         if self.x < self.x_end:
-        #             self.xvelocity = self.dir
-        #         if self.x >= self.x_end:
-        #             self.xvelocity = 0
-        #             self.patrolling = False
-        #     elif self.dir == -1:
-        #         if self.x > self.x_begin:
-        #             self.xvelocity = self.dir
-        #         if self.x <= self.x_begin:
-        #             self.xvelocity = 0
-        #             self.patrolling = False
-        # pass
-
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
             # TODO game over if player is not hidden
             if not other.is_hidden():
                 sge.game.current_room.reset()
-
             pass
 
+    def reset(self):
+        self.x = self.xstart
+        self.y = self.ystart
+        self.xvelocity = 0
+        self.yvelocity = 0
+        self.timer = 0
 
 class Victim(sge.dsp.Object):
 
-    def __init__(self, x, y):
+    _SLEEP_DELAY = 5
+
+    def __init__(self, x, y, player):
+        self.player = player
         super().__init__(x, y, checks_collisions=True, collision_precise=True)
+
 
     def event_create(self):
         self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory=IMG_PATH)
@@ -206,14 +192,23 @@ class Victim(sge.dsp.Object):
     def event_step(self, time_passed, delta_mult):
         # TODO when timer runs out wake victim
         if sge.game.current_room.timer <= 0:
-            self.sprite = self.sprite_awake
+            if self.sprite is self.sprite_asleep:
+                self.sprite = self.sprite_awake
+                sge.game.current_room.timer = Victim._SLEEP_DELAY
+            else:
+                self.sprite = self.sprite_asleep
+                sge.game.current_room.timer = sge.game.current_room.start_timer
+        if self.sprite is self.sprite_awake:
+            if not self.player.is_hidden():
+                sge.game.current_room.reset()
 
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
-            # TODO end level
-            print(sge.game.current_room.timer)
-            sge.game.current_room.reset()
+            # TODO end level and create a new room
+            pass
 
+    def reset(self):
+        self.sprite = self.sprite_asleep
 
 # Create Game object
 Core.Game(width=VIEW_WIDTH,
@@ -257,7 +252,7 @@ main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 # Create Objects
 objects = []
 player = Player(-300, ROOM_HEIGHT, move_speed=3)
-victim = Victim(ROOM_WIDTH, ROOM_HEIGHT)
+victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
 pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
 
 objects.append(player)
@@ -273,7 +268,7 @@ main_room = Core.Room(objects,
                       views=[main_view],
                       width=ROOM_WIDTH,
                       background=background,
-                      timer=60)
+                      timer=30)
 main_room.font = sge.gfx.Font()
 sge.game.start_room = main_room
 

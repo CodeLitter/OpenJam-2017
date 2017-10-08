@@ -70,7 +70,7 @@ class Room(sge.dsp.Room):
         super().__init__(objects, width, height, views,
                          background, background_x, background_y,
                          object_area_width, object_area_height)
-        self.timer = self.start_timer = timer * 1000
+        self.timer = self.start_timer = timer
         pass
 
     def event_room_start(self):
@@ -79,19 +79,20 @@ class Room(sge.dsp.Room):
 
     def event_step(self, time_passed, delta_mult):
         sge.game.project_sprite(self.sprite_timer, 0, 0, 0)
-        sge.game.project_text(self._font, str(int(self.timer / 1000)),
+        sge.game.project_text(self._font, str(int(self.timer)),
                               self.sprite_timer.width / 2,
                               self.sprite_timer.height / 2,
                               color=sge.gfx.Color("white"),
                               halign="left",
                               valign="middle")
-        self.timer = clamp(self.timer - time_passed, 0, self.start_timer)
+        self.timer = clamp(self.timer - time_passed / 1000, 0, self.start_timer)
 
         if Game.key_pressed("r"):
             self.reset()
 
     def reset(self):
         for obj in self.objects:
-            obj.x = obj.xstart
-            obj.y = obj.ystart
+            reset = getattr(obj, "reset", None)
+            if callable(reset):
+                obj.reset()
         self.timer = self.start_timer
