@@ -7,6 +7,8 @@ import ntpath
 import os
 import random
 import Core
+import Rooms
+
 
 # Constants
 VIEW_WIDTH = 1280
@@ -17,21 +19,19 @@ FLOOR_HEIGHT = 200
 WALL_HEIGHT = ROOM_HEIGHT - FLOOR_HEIGHT
 FLOOR_CENTER = WALL_HEIGHT + FLOOR_HEIGHT / 2
 IMAGE_SPEED_FACTOR = 5
-IMG_PATH = "images"
-SND_PATH = "sounds"
 
 
 class Player(sge.dsp.Object):
 
-    def __init__(self, x, y, move_speed=1):
-        super().__init__(x, y, collision_precise=True)
+    def __init__(self, move_speed=1, **kwargs):
+        super().__init__(collision_precise=True, **kwargs)
         self.move_speed = move_speed
 
     def event_create(self):
         self.sprite_walk = sge.gfx.Sprite(name="vampWalk",
-                                          directory=IMG_PATH)
+                                          directory=Core.IMG_PATH)
         self.sprite_crouch = sge.gfx.Sprite(name="vampCrouch",
-                                            directory=IMG_PATH)
+                                            directory=Core.IMG_PATH)
         self.sprite = self.sprite_walk
         self.image_origin_x = self.sprite.width / 2
         self.image_origin_y = self.sprite.height - 20
@@ -118,7 +118,7 @@ class Obstacle(sge.dsp.Object):
 class Pet(sge.dsp.Object):
 
     def __init__(self, x, y, domain, turn_delay=1, move_speed=1):
-        sprite = sge.gfx.Sprite(name="catWalk", directory=IMG_PATH)
+        sprite = sge.gfx.Sprite(name="catWalk", directory=Core.IMG_PATH)
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
@@ -160,7 +160,7 @@ class Pet(sge.dsp.Object):
         if isinstance(other, Player):
             # TODO game over if player is not hidden
             if not other.is_hidden():
-                sge.game.current_room.play_song(os.path.join(SND_PATH, "tomcat.ogg"))
+                sge.game.current_room.play_sound(os.path.join(Core.SND_PATH, "tomcat.ogg"))
                 sge.game.current_room.reset()
             pass
 
@@ -181,8 +181,10 @@ class Victim(sge.dsp.Object):
         super().__init__(x, y, checks_collisions=True, collision_precise=True)
 
     def event_create(self):
-        self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep", directory=IMG_PATH)
-        self.sprite_awake = sge.gfx.Sprite(name="victimAwake", directory=IMG_PATH)
+        self.sprite_asleep = sge.gfx.Sprite(name="victimAsleep",
+                                            directory=Core.IMG_PATH)
+        self.sprite_awake = sge.gfx.Sprite(name="victimAwake",
+                                           directory=Core.IMG_PATH)
         self.sprite = self.sprite_asleep
         self.image_origin_x = self.sprite.width
         self.image_origin_y = self.sprite.height
@@ -203,13 +205,18 @@ class Victim(sge.dsp.Object):
                 sge.game.current_room.timer = sge.game.current_room.start_timer
         if self.sprite is self.sprite_awake:
             if not self.player.is_hidden():
-                if abs(self.x - self.player.x) < next(sge.game.current_room.views).width:
+                view = next(iter(sge.game.current_room.views))
+                if abs(self.x - self.player.x) < view.width:
                     sge.game.current_room.reset()
 
     def event_collision(self, other, xdirection, ydirection):
         if isinstance(other, Player):
             # TODO end level and create a new room
-            pass
+            room = sge.game.next_room()
+            if room is not None:
+                room.start()
+            else:
+                sge.game.end()
 
     def reset(self):
         self.sprite = self.sprite_asleep
@@ -218,23 +225,24 @@ class Victim(sge.dsp.Object):
 # TODO move creation code to an initialization file
 def main():
     # Create Game object
-    Core.Game(width=VIEW_WIDTH,
-              height=VIEW_HEIGHT,
-              fps=60,
-              window_text="Leave a mark",
-              scale=1)
+    Core.Game.config_create("config.json")
+    # Core.Game(width=VIEW_WIDTH,
+    #           height=VIEW_HEIGHT,
+    #           fps=60,
+    #           window_text="Leave a mark",
+    #           scale=1)
 
     # Load Sprite
     obstacle_sprites = []
-    for filename in glob.iglob(os.path.join(IMG_PATH, "obstacle_*.*")):
+    for filename in glob.iglob(os.path.join(Core.IMG_PATH, "obstacle_*.*")):
         filename = ntpath.basename(filename).split('.')[0]
-        sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
+        sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
         obstacle_sprites.append(sprite)
 
     background_sprites = []
-    for filename in glob.iglob(os.path.join(IMG_PATH, "wallPanel*.*")):
+    for filename in glob.iglob(os.path.join(Core.IMG_PATH, "wallPanel*.*")):
         filename = ntpath.basename(filename).split('.')[0]
-        sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
+        sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
         background_sprites.append(sprite)
 
     # Create backgrounds
@@ -249,12 +257,9 @@ def main():
 
     # Load fonts
 
-    # Create View
-    main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
-
     # Create Objects
     objects = []
-    player = Player(-300, ROOM_HEIGHT, move_speed=3)
+    player = Player(x=-300, y=ROOM_HEIGHT, move_speed=3)
     victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
     pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
 
@@ -267,15 +272,16 @@ def main():
                     for count in range(1, 5)])
 
     # Create rooms
-    main_room = Core.Room(objects,
-                          views=[main_view],
-                          width=ROOM_WIDTH,
-                          background=background,
-                          timer=60)
-    main_room.font = sge.gfx.Font()
-    sge.game.start_room = main_room
+    # For each config found create associated room
+    font = sge.gfx.Font()
+    room = Rooms.build_room(os.path.join("rooms", "0.json"),
+                            font=font,
+                            objects=objects,
+                            views=[sge.game.view],
+                            background=background)
+    sge.game.rooms.append(room)
 
-    sge.game.start_room.play_song(os.path.join(SND_PATH, "Anxiety.ogg"))
+    sge.game.start_room = sge.game.next_room()
 
     sge.game.start()
 
