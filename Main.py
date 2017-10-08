@@ -274,6 +274,9 @@ def main():
                           timer=30)
     main_room.font = sge.gfx.Font()
     sge.game.start_room = main_room
+
+    sge.game.start_room.play_song(os.path.join("sounds", "Anxiety.ogg"))
+
     sge.game.start()
 
 

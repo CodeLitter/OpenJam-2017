@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sge
+import pygame.mixer
 import random
+import os
 
 
 def clamp(number, low, high):
@@ -14,7 +16,6 @@ def randomize_layers(layers, sprites):
 
 
 class Game(sge.dsp.Game):
-
     @staticmethod
     def key_pressed(key):
         if key not in Game.keys:
@@ -36,6 +37,7 @@ class Game(sge.dsp.Game):
                          window_text, window_icon,
                          collision_events_enabled)
         Game.keys = {}
+
 
     def event_step_late(self, time_passed, delta_mult):
         for key, value in Game.keys.items():
@@ -89,6 +91,10 @@ class Room(sge.dsp.Room):
 
         if Game.key_pressed("r"):
             self.reset()
+
+    def play_song(self, path):
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.play(0)
 
     def reset(self):
         for obj in self.objects:
