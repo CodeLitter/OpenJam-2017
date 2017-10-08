@@ -19,7 +19,7 @@ External Libraries/Engines:
   * [SFXR](http://www.drpetter.se/project_sfxr.html) - Sound Effects Generator
   
 Art:
-  * [Textures.com](Textures.com)
+  * Textures.com
   * Game-Icons.net  
     * [Pocket Watch](http://game-icons.net/skoll/originals/pocket-watch.html) and [Sight Disabled](http://game-icons.net/skoll/originals/sight-disabled.html) icons by skoll
     * [Batwing Emblem](http://game-icons.net/lorc/originals/batwing-emblem.html) and [Fangs Circle](http://game-icons.net/lorc/originals/fangs-circle.html) icons by lorc
@@ -48,4 +48,3 @@ Art:
       http://creativecommons.org/licenses/by/3.0/
   * SoundBible
     * [TomCat](http://soundbible.com/1687-TomCat.html) by Mr Smith
-  * SFXR - Sound Effects Generator
