@@ -4,7 +4,6 @@
 
 You're a vampire who lives in the basement of a hotel.  The hotel owners realize you've been staying there for a while and have decided to let you roam the halls in enjoy the blood buffet of their guests, so long as you aren't discovered.  Your goal is to make it through hotel rooms, avoid obstacles, hide from the guests, and leave your mark on the victim by feasting on their blood!
 
-=====
 Attributions:
 =====
 Scripting Language
