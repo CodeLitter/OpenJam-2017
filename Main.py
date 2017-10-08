@@ -213,69 +213,69 @@ class Victim(sge.dsp.Object):
         self.sprite = self.sprite_asleep
 
 
-# Create Game object
-Core.Game(width=VIEW_WIDTH,
-          height=VIEW_HEIGHT,
-          fps=60,
-          window_text="Leave a mark",
-          scale=1)
+def main():
+    # Create Game object
+    Core.Game(width=VIEW_WIDTH,
+              height=VIEW_HEIGHT,
+              fps=60,
+              window_text="Leave a mark",
+              scale=1)
 
-# Load Sprite
-# TODO find out the order of sprite drawing
+    # Load Sprite
+    # TODO find out the order of sprite drawing
 
-obstacle_sprites = []
-for filename in glob.iglob(os.path.join(IMG_PATH, "obstacle_*.*")):
-    filename = ntpath.basename(filename).split('.')[0]
-    sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
-    obstacle_sprites.append(sprite)
+    obstacle_sprites = []
+    for filename in glob.iglob(os.path.join(IMG_PATH, "obstacle_*.*")):
+        filename = ntpath.basename(filename).split('.')[0]
+        sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
+        obstacle_sprites.append(sprite)
 
-background_sprites = []
-for filename in glob.iglob(os.path.join(IMG_PATH, "wallPanel*.*")):
-    filename = ntpath.basename(filename).split('.')[0]
-    sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
-    background_sprites.append(sprite)
+    background_sprites = []
+    for filename in glob.iglob(os.path.join(IMG_PATH, "wallPanel*.*")):
+        filename = ntpath.basename(filename).split('.')[0]
+        sprite = sge.gfx.Sprite(filename, directory=IMG_PATH)
+        background_sprites.append(sprite)
+
+    # Create backgrounds
+    layers = []
+    for offset in range(int(ROOM_WIDTH / background_sprites[0].width)):
+        layer = sge.gfx.BackgroundLayer(None, offset * sprite.width, 0)
+        layers.append(layer)
+
+    Core.randomize_layers(layers, background_sprites)
+
+    background = sge.gfx.Background(layers, sge.gfx.Color("white"))
+
+    # Load fonts
 
 
-# Create backgrounds
-layers = []
-for offset in range(int(ROOM_WIDTH / background_sprites[0].width)):
-    layer = sge.gfx.BackgroundLayer(None, offset * sprite.width, 0)
-    layers.append(layer)
+    # Create View
+    main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 
-Core.randomize_layers(layers, background_sprites)
+    # Create Objects
+    objects = []
+    player = Player(-300, ROOM_HEIGHT, move_speed=3)
+    victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
+    pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
 
-background = sge.gfx.Background(layers, sge.gfx.Color("white"))
+    objects.append(player)
+    objects.append(victim)
+    objects.append(pet)
+    objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
+                             ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
+                             random.choice(obstacle_sprites))
+                    for count in range(1, 5)])
 
-# Load fonts
+    # Create rooms
+    main_room = Core.Room(objects,
+                          views=[main_view],
+                          width=ROOM_WIDTH,
+                          background=background,
+                          timer=30)
+    main_room.font = sge.gfx.Font()
+    sge.game.start_room = main_room
+    sge.game.start()
 
-
-# Create View
-main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
-
-# Create Objects
-objects = []
-player = Player(-300, ROOM_HEIGHT, move_speed=3)
-victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
-pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
-
-objects.append(player)
-objects.append(victim)
-objects.append(pet)
-objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
-                         ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
-                         random.choice(obstacle_sprites))
-                for count in range(1, 5)])
-
-# Create rooms
-main_room = Core.Room(objects,
-                      views=[main_view],
-                      width=ROOM_WIDTH,
-                      background=background,
-                      timer=30)
-main_room.font = sge.gfx.Font()
-sge.game.start_room = main_room
-
-# sge.game.mouse.visible = False
 
 if __name__ == "__main__":
-    sge.game.start()
+    main()
