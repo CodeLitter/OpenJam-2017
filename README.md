@@ -15,8 +15,7 @@ External Libraries/Enginees
   
 Art:
   * Textures.com
-  * Game-Icons.net
-  
+  * Game-Icons.net  
   ..* [Pocket Watch](http://game-icons.net/skoll/originals/pocket-watch.html) and [Sight Disabled](http://game-icons.net/skoll/originals/sight-disabled.html) icons by skoll
   
   ..* [Batwing Emblem](http://game-icons.net/lorc/originals/batwing-emblem.html) and [Fangs Circle](http://game-icons.net/lorc/originals/fangs-circle.html) icons by lorc
