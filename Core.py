@@ -73,6 +73,7 @@ class Room(sge.dsp.Room):
                          background, background_x, background_y,
                          object_area_width, object_area_height)
         self.timer = self.start_timer = timer
+        self.sounds = {}
         pass
 
     def event_room_start(self):
@@ -91,6 +92,12 @@ class Room(sge.dsp.Room):
 
         if Game.key_pressed("r"):
             self.reset()
+
+    def play_song(self, path):
+        sound = None
+        if path not in self.sounds:
+            sound = self.sounds[path] = pygame.mixer.Sound(path)
+        sound.play()
 
     def play_song(self, path):
         pygame.mixer.music.load(path)

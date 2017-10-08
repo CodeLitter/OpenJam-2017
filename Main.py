@@ -18,6 +18,7 @@ WALL_HEIGHT = ROOM_HEIGHT - FLOOR_HEIGHT
 FLOOR_CENTER = WALL_HEIGHT + FLOOR_HEIGHT / 2
 IMAGE_SPEED_FACTOR = 5
 IMG_PATH = "images"
+SND_PATH = "sounds"
 
 
 class Player(sge.dsp.Object):
@@ -159,6 +160,7 @@ class Pet(sge.dsp.Object):
         if isinstance(other, Player):
             # TODO game over if player is not hidden
             if not other.is_hidden():
+                sge.game.current_room.play_song(os.path.join(SND_PATH, "tomcat.ogg"))
                 sge.game.current_room.reset()
             pass
 
@@ -201,7 +203,7 @@ class Victim(sge.dsp.Object):
                 sge.game.current_room.timer = sge.game.current_room.start_timer
         if self.sprite is self.sprite_awake:
             if not self.player.is_hidden():
-                if abs(self.x - self.player.x) < main_view.width:
+                if abs(self.x - self.player.x) < next(sge.game.current_room.views).width:
                     sge.game.current_room.reset()
 
     def event_collision(self, other, xdirection, ydirection):
@@ -213,6 +215,7 @@ class Victim(sge.dsp.Object):
         self.sprite = self.sprite_asleep
 
 
+# TODO move creation code to an initialization file
 def main():
     # Create Game object
     Core.Game(width=VIEW_WIDTH,
@@ -222,8 +225,6 @@ def main():
               scale=1)
 
     # Load Sprite
-    # TODO find out the order of sprite drawing
-
     obstacle_sprites = []
     for filename in glob.iglob(os.path.join(IMG_PATH, "obstacle_*.*")):
         filename = ntpath.basename(filename).split('.')[0]
@@ -248,7 +249,6 @@ def main():
 
     # Load fonts
 
-
     # Create View
     main_view = sge.dsp.View(0, 0, width=VIEW_WIDTH, height=VIEW_HEIGHT)
 
@@ -271,11 +271,11 @@ def main():
                           views=[main_view],
                           width=ROOM_WIDTH,
                           background=background,
-                          timer=30)
+                          timer=60)
     main_room.font = sge.gfx.Font()
     sge.game.start_room = main_room
 
-    sge.game.start_room.play_song(os.path.join("sounds", "Anxiety.ogg"))
+    sge.game.start_room.play_song(os.path.join(SND_PATH, "Anxiety.ogg"))
 
     sge.game.start()
 
