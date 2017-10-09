@@ -3,9 +3,7 @@ import sge
 import pygame.math
 import math
 import glob
-import ntpath
 import os
-import random
 import json
 import Core
 import Rooms
@@ -253,65 +251,19 @@ class Victim(sge.dsp.Object):
 def main():
     # Create Game object
     Core.Game.config_create("config.json")
-    # Core.Game(width=VIEW_WIDTH,
-    #           height=VIEW_HEIGHT,
-    #           fps=60,
-    #           window_text="Leave a mark",
-    #           scale=1)
-
-    # Load Sprite
-    # obstacle_sprites = []
-    # for filename in glob.iglob(os.path.join(Core.IMG_PATH, "obstacle_*.*")):
-    #     filename = ntpath.basename(filename).split('.')[0]
-    #     sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
-    #     obstacle_sprites.append(sprite)
-
-    # background_sprites = []
-    # for filename in glob.iglob(os.path.join(Core.IMG_PATH, "wallPanel*.*")):
-    #     filename = ntpath.basename(filename).split('.')[0]
-    #     sprite = sge.gfx.Sprite(filename, directory=Core.IMG_PATH)
-    #     background_sprites.append(sprite)
-
-    # Create backgrounds
-    layers = []
-    for offset in range(int(ROOM_WIDTH / 320)):
-        layer = sge.gfx.BackgroundLayer(None, offset * 320, 0)
-        layers.append(layer)
-
-    background = sge.gfx.Background(layers, sge.gfx.Color("white"))
 
     # Load fonts
     font = sge.gfx.Font()
-
-    # Create Objects
-    # player = Player(x=-300, y=ROOM_HEIGHT, move_speed=3)
-    # victim = Victim(ROOM_WIDTH, ROOM_HEIGHT, player=player)
-    # pet = Pet(ROOM_WIDTH / 2, FLOOR_CENTER, -VIEW_WIDTH / 2)
-
-    # objects.append(player)
-    # objects.append(victim)
-    # objects.append(pet)
-    # objects.extend([Obstacle(count * 320,  # obstacle_sprites[0].width,
-    #                          ROOM_HEIGHT - random.randrange(FLOOR_HEIGHT),
-    #                          random.choice(obstacle_sprites))
-    #                 for count in range(1, 5)])
 
     # Create rooms
     for path in glob.iglob(os.path.join("rooms", "*.json")):
         filename = os.path.basename(path)
         objects = create_objects(os.path.join("objects", filename))
         room = Rooms.create_room(path, font=font, objects=objects,
-                                 views=[sge.game.view], background=background)
+                                 views=[sge.game.view])
         sge.game.rooms.append(room)
 
-
-    # sge.game.rooms
-    #
-    # # For each config found create associated room
-    # sge.game.rooms.append(room)
-
     sge.game.start_room = sge.game.next_room()
-
     sge.game.start()
 
 

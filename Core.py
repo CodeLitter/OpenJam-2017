@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sge
-import random
 import json
 
 
@@ -11,12 +10,6 @@ SND_PATH = "sounds"
 
 def clamp(number, low, high):
     return max(low, min(high, number))
-
-
-def randomize_layers(layers, sprites):
-    for layer in layers:
-        sprite = random.choice(sprites)
-        layer.sprite = sprite
 
 
 class Game(sge.dsp.Game):
