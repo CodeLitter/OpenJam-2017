@@ -1,15 +1,8 @@
 {
     "TransitionButton": {
-        "x": 9,
-        "y": 400,
+        "x": 1034,
+        "y": 600,
         "sprite_name": "playButton",
         "room_index": 4
-    },
-
-    "TransitionButton": {
-        "x": 1034,
-        "y": 400,
-        "sprite_name": "instructButton",
-        "room_index": 3
     }
 }
