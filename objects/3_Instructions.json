@@ -1,5 +1,5 @@
 {
-    "BackButton": {
+    "TransitionButton": {
         "x": 9,
         "y": 400,
         "sprite_name": "playButton",

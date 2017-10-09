@@ -1,5 +1,5 @@
 {
-	"InstructionsScreen": {
+	"TitleScreen": {
 		"width": 2562,
 		"height": 720,
 		"sprite_name": "instructionsPage"

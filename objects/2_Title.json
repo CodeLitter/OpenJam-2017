@@ -6,14 +6,14 @@
         "room_index": 4
     },
 
-    "InstructionsButton": {
+    "TransitionButton": {
         "x": 524,
         "y": 400,
         "sprite_name": "instructButton",
         "room_index": 3
     },
 
-    "CreditsButton": {
+    "TransitionButton": {
 		"x": 984,
 		"y": 400,
 		"sprite_name": "creditsButton",
