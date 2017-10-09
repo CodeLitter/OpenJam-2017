@@ -1,0 +1,8 @@
+{
+    "TransitionButton": {
+        "x": 9,
+        "y": 600,
+        "sprite_name": "backButton",
+        "room_index": 3
+    }
+}

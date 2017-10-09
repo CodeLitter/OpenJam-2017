@@ -1,0 +1,7 @@
+{
+	"TitleScreen": {
+		"width": 1280,
+		"height": 720,
+		"sprite_name": "creditsPage"
+	}
+}

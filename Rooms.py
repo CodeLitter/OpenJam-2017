@@ -48,6 +48,9 @@ class SplashScreen(sge.dsp.Room):
             else:
                 sge.game.end()
 
+    def event_room_resume(self):
+        self.timer = 0
+
     def event_step(self, time_passed, delta_mult):
         if self.timer >= self.transition_time:
             room = sge.game.next_room()
