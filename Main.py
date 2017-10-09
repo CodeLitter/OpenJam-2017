@@ -24,8 +24,9 @@ def create_objects(path):
     with open(path) as file:
         attributes = json.load(file)
         objects = []
+        print(attributes)
         for _type in attributes:
-            obj = eval(_type)(**attributes[_type])
+            obj = eval(_type.split('/')[0])(**attributes[_type])
             objects.append(obj)
         return objects
 
@@ -319,7 +320,6 @@ def main():
     for path in sorted(glob.iglob(os.path.join("rooms", "*.json"))):
         filename = os.path.basename(path)
         objects_path = os.path.join("objects", filename)
-        print(objects_path)
         if os.path.exists(objects_path):
             objects = create_objects(objects_path)
         else:
