@@ -24,7 +24,6 @@ def create_objects(path):
     with open(path) as file:
         attributes = json.load(file)
         objects = []
-        print(attributes)
         for _type in attributes:
             obj = eval(_type.split('/')[0])(**attributes[_type])
             objects.append(obj)
@@ -108,7 +107,7 @@ class Obstacle(sge.dsp.Object):
             sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
             Core.Game.sprites[sprite_name] = sprite
         else:
-            sprite = Core.Game.sprites.sprites[sprite_name]
+            sprite = Core.Game.sprites[sprite_name]
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
