@@ -1,0 +1,8 @@
+{
+	"SplashScreen":{
+		"width": 1280,
+		"height": 720,
+		"sprite_name": "openJamPage",
+		"transition_time": 3500
+	}
+}

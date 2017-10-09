@@ -1,0 +1,8 @@
+{
+	"SplashScreen":{
+		"width": 1280,
+		"height": 720,
+		"sprite_name": "codeLitter",
+		"transition_time": 4500
+	}
+}

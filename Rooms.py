@@ -27,6 +27,38 @@ def align_layers(layers):
         layer.x = index * layer.sprite.width
 
 
+class SplashScreen(sge.dsp.Room):
+
+    def __init__(self, sprite_name, transition=None, transition_time=1500, font=None, **kwargs):
+        sprite = sge.gfx.Sprite(sprite_name, Core.IMG_PATH)
+        sprite.speed = 1 / 20
+        layers = [sge.gfx.BackgroundLayer(sprite, 0, 0)]
+        background = sge.gfx.Background(layers, sge.gfx.Color("white"))
+        super().__init__(background=background, **kwargs)
+        self.font = font
+        self.transition = transition
+        self.transition_time = transition_time
+        self.timer = 0
+
+    def event_room_start(self):
+        if self.transition is not None:
+            room = sge.game.next_room()
+            if room is not None:
+                room.start(self.transition, self.transition_time)
+            else:
+                sge.game.end()
+
+    def event_step(self, time_passed, delta_mult):
+        if self.timer >= self.transition_time:
+            room = sge.game.next_room()
+            if room is not None:
+                room.start(self.transition, self.transition_time)
+            else:
+                sge.game.end()
+        self.timer += time_passed
+
+
+
 class TitleScreen(sge.dsp.Room):
 
     def __init__(self, sprite_name, font=None, **kwargs):

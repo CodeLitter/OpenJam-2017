@@ -318,7 +318,13 @@ def main():
     # Create rooms
     for path in sorted(glob.iglob(os.path.join("rooms", "*.json"))):
         filename = os.path.basename(path)
-        objects = create_objects(os.path.join("objects", filename))
+        objects_path = os.path.join("objects", filename)
+        print(objects_path)
+        if os.path.exists(objects_path):
+            objects = create_objects(objects_path)
+        else:
+            objects = []
+
         room = Rooms.create_room(path, font=font, objects=objects,
                                  views=[sge.game.view])
         sge.game.rooms.append(room)
