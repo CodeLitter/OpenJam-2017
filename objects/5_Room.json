@@ -1,0 +1,46 @@
+{
+	"Player": {
+		"x": -200,
+		"y": 720,
+		"move_speed": 3
+	},
+	"Pet/1": {
+		"x": 400,
+		"y": 620,
+		"domain": 600
+	},
+	"Pet/2": {
+		"x": 1226,
+		"y": 620,
+		"domain": 600
+	},
+    "Obstacle/1": {
+        "x": 326,
+        "y": 560,
+        "sprite_name": "obstacle_chair"
+    },
+    "Obstacle/2": {
+        "x": 1250,
+        "y": 720,
+        "sprite_name": "obstacle_loungeChair"
+    },
+    "Obstacle/3": {
+        "x": 680,
+        "y": 700,
+        "sprite_name": "obstacle_nightstand"
+    },
+    "Obstacle/4": {
+        "x": 2100,
+        "y": 580,
+        "sprite_name": "obstacle_lamp"
+    },
+    "Obstacle/5": {
+        "x": 1650,
+        "y": 700,
+        "sprite_name": "obstacle_coatRack"
+    },
+	"Victim": {
+		"x": 2652,
+		"y": 720
+	}
+}
