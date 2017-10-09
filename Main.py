@@ -102,14 +102,12 @@ class Player(sge.dsp.Object):
 
 class Obstacle(sge.dsp.Object):
 
-    sprites = {}
-
     def __init__(self, x, y, sprite_name):
-        if sprite_name not in Obstacle.sprites:
+        if sprite_name not in Core.Game.sprites:
             sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
-            Obstacle.sprites[sprite_name] = sprite
+            Core.Game.sprites[sprite_name] = sprite
         else:
-            sprite = Obstacle.sprites[sprite_name]
+            sprite = Core.Game.sprites.sprites[sprite_name]
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
@@ -136,11 +134,11 @@ class Pet(sge.dsp.Object):
     sprites = {}
 
     def __init__(self, x, y, domain, sprite_name="catWalk", turn_delay=1, move_speed=1):
-        if sprite_name not in Obstacle.sprites:
+        if sprite_name not in Core.Game.sprites:
             sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
-            Obstacle.sprites[sprite_name] = sprite
+            Core.Game.sprites[sprite_name] = sprite
         else:
-            sprite = Obstacle.sprites[sprite_name]
+            sprite = Core.Game.sprites[sprite_name]
         super().__init__(x, y, sprite=sprite,
                          image_origin_x=sprite.width / 2,
                          image_origin_y=sprite.height,
@@ -247,6 +245,43 @@ class Victim(sge.dsp.Object):
         self.sprite = self.sprite_asleep
 
 
+class TransitionButton(sge.dsp.Object):
+
+    def __init__(self, x, y, sprite_name, room_index):
+        if sprite_name not in Core.Game.sprites:
+            sprite = sge.gfx.Sprite(sprite_name, directory=Core.IMG_PATH)
+            Core.Game.sprites[sprite_name] = sprite
+        else:
+            sprite = Core.Game.sprites[sprite_name]
+        super().__init__(x, y, sprite=sprite, checks_collisions=True)
+        self.room_index = room_index
+        self.sprite_normal = self.sprite
+        sprite_name_clicked = sprite_name + '_clicked'
+        if sprite_name_clicked not in Core.Game.sprites:
+            self.sprite_clicked = sge.gfx.Sprite(sprite_name_clicked, directory=Core.IMG_PATH)
+            Core.Game.sprites[sprite_name_clicked] = self.sprite_clicked
+        else:
+            self.sprite_clicked = Core.Game.sprites[sprite_name_clicked]
+
+        sprite_name_hover = sprite_name + '_hover'
+        if sprite_name_hover not in Core.Game.sprites:
+            self.sprite_hover = sge.gfx.Sprite(sprite_name_hover, directory=Core.IMG_PATH)
+            Core.Game.sprites[sprite_name_hover] = self.sprite_hover
+        else:
+            self.sprite_hover = Core.Game.sprites[sprite_name_hover]
+
+    def event_step(self, time_passed, delta_mult):
+        self.sprite = self.sprite_normal
+
+    def event_collision(self, other, xdirection, ydirection):
+        if isinstance(other, sge.dsp.Mouse):
+            self.sprite = self.sprite_hover
+            if sge.mouse.get_pressed("left"):
+                self.sprite = self.sprite_clicked
+                room = sge.game.get_room(self.room_index)
+                room.start()
+
+
 # TODO move creation code to an initialization file
 def main():
     # Create Game object
@@ -256,33 +291,32 @@ def main():
     font = sge.gfx.Font()
 
     #==New Shit To Look At=================================================
-    # create menu sprites
-    play_sprite = sge.gfx.Sprite("playButton.png", Core.IMG_PATH)
-    instructions_sprite = sge.gfx.Sprite("instructButton.png", Core.IMG_PATH)
-    credits_sprite = sge.gfx.Sprite("creditsButton.png", Core.IMG_PATH)
-
-    # create menu objects
-    menu_objects = []
-    play_button = sge.dsp.Object(524, 400, play_sprite)
-    instructions_button = sge.dsp.Object(9, 400, instructions_sprite)
-    credits_button = sge.dsp.Object(984, 400, credits_sprite)
-
-    menu_objects.append(play_button)
-    menu_objects.append(instructions_button)
-    menu_objects.append(credits_button)
-
-    # create menu room
-    menu_room = sge.dsp.Room(menu_objects,
-                             ROOM_WIDTH/2,
-                             ROOM_HEIGHT,
-                             sge.dsp.View,
-                             #NEED_A_BACKGROUND
-                             )
+    # # create menu sprites
+    # play_sprite = sge.gfx.Sprite("playButton.png", Core.IMG_PATH)
+    # instructions_sprite = sge.gfx.Sprite("instructButton.png", Core.IMG_PATH)
+    # credits_sprite = sge.gfx.Sprite("creditsButton.png", Core.IMG_PATH)
+    #
+    # # create menu objects
+    # menu_objects = []
+    # play_button = sge.dsp.Object(524, 400, play_sprite)
+    # instructions_button = sge.dsp.Object(9, 400, instructions_sprite)
+    # credits_button = sge.dsp.Object(984, 400, credits_sprite)
+    #
+    # menu_objects.append(play_button)
+    # menu_objects.append(instructions_button)
+    # menu_objects.append(credits_button)
+    #
+    # # create menu room
+    # menu_room = sge.dsp.Room(menu_objects,
+    #                          ROOM_WIDTH/2,
+    #                          ROOM_HEIGHT,
+    #                          sge.dsp.View,
+    #                          #NEED_A_BACKGROUND
+    #                          )
     #==New Shit To Look At=================================================
 
-
     # Create rooms
-    for path in glob.iglob(os.path.join("rooms", "*.json")):
+    for path in sorted(glob.iglob(os.path.join("rooms", "*.json"))):
         filename = os.path.basename(path)
         objects = create_objects(os.path.join("objects", filename))
         room = Rooms.create_room(path, font=font, objects=objects,

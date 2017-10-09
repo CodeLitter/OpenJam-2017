@@ -28,7 +28,13 @@ def align_layers(layers):
 
 
 class TitleScreen(sge.dsp.Room):
-    pass
+
+    def __init__(self, sprite_name, font=None, **kwargs):
+        sprite = sge.gfx.Sprite(sprite_name, Core.IMG_PATH)
+        layers = [sge.gfx.BackgroundLayer(sprite, 0, 0)]
+        background = sge.gfx.Background(layers, sge.gfx.Color("white"))
+        super().__init__(background=background, **kwargs)
+        self.font = font
 
 
 class PlayArea(sge.dsp.Room):

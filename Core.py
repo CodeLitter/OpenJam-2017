@@ -15,6 +15,7 @@ def clamp(number, low, high):
 class Game(sge.dsp.Game):
 
     keys = {}
+    sprites = {}
 
     @staticmethod
     def key_pressed(key):
@@ -53,6 +54,11 @@ class Game(sge.dsp.Game):
 
     def event_close(self):
         self.end()
+
+    def get_room(self, index):
+        rooms = self.rooms[index:]
+        self.iter_room = iter(rooms)
+        return next(self.iter_room, None)
 
     def next_room(self):
         return next(self.iter_room, None)
