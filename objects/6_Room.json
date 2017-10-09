@@ -1,0 +1,31 @@
+{
+	"Player": {
+		"x": -200,
+		"y": 720,
+		"move_speed": 3
+	},
+	"Pet": {
+		"x": 900,
+		"y": 540,
+		"domain": 800
+	},
+    "Obstacle/1": {
+        "x": 420,
+        "y": 546,
+        "sprite_name": "obstacle_chair"
+    },
+    "Obstacle/2": {
+        "x": 2000,
+        "y": 700,
+        "sprite_name": "obstacle_lamp"
+    },
+    "Obstacle/3": {
+        "x": 1054,
+        "y": 632,
+        "sprite_name": "obstacle_nightstand"
+    },
+	"Victim": {
+		"x": 2652,
+		"y": 720
+	}
+}
