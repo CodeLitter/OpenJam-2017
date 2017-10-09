@@ -9,19 +9,19 @@
 		"y": 620,
 		"domain": 600
 	},
-    "Obstacle": {
+    "Obstacle/1": {
         "x": 1326,
-        "y": 520,
+        "y": 560,
         "sprite_name": "obstacle_chair"
     },
-    "Obstacle": {
-        "x": 1560,
-        "y": 660,
+    "Obstacle/2": {
+        "x": 1800,
+        "y": 720,
         "sprite_name": "obstacle_loungeChair"
     },
-    "Obstacle": {
-        "x": 150,
-        "y": 600,
+    "Obstacle/3": {
+        "x": 450,
+        "y": 700,
         "sprite_name": "obstacle_nightstand"
     },
 	"Victim": {
