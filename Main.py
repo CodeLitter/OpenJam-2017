@@ -255,6 +255,32 @@ def main():
     # Load fonts
     font = sge.gfx.Font()
 
+    #==New Shit To Look At=================================================
+    # create menu sprites
+    play_sprite = sge.gfx.Sprite("playButton.png", Core.IMG_PATH)
+    instructions_sprite = sge.gfx.Sprite("instructButton.png", Core.IMG_PATH)
+    credits_sprite = sge.gfx.Sprite("creditsButton.png", Core.IMG_PATH)
+
+    # create menu objects
+    menu_objects = []
+    play_button = sge.dsp.Object(524, 400, play_sprite)
+    instructions_button = sge.dsp.Object(9, 400, instructions_sprite)
+    credits_button = sge.dsp.Object(984, 400, credits_sprite)
+
+    menu_objects.append(play_button)
+    menu_objects.append(instructions_button)
+    menu_objects.append(credits_button)
+
+    # create menu room
+    menu_room = sge.dsp.Room(menu_objects,
+                             ROOM_WIDTH/2,
+                             ROOM_HEIGHT,
+                             sge.dsp.View,
+                             #NEED_A_BACKGROUND
+                             )
+    #==New Shit To Look At=================================================
+
+
     # Create rooms
     for path in glob.iglob(os.path.join("rooms", "*.json")):
         filename = os.path.basename(path)
