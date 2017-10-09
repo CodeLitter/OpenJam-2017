@@ -1,0 +1,8 @@
+{
+	"TransitionButton": {
+		"x": 200,
+		"y": 200,
+		"sprite_name": "playButton",
+		"room_index": 1
+	}
+}
