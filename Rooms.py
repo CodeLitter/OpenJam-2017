@@ -41,6 +41,10 @@ class SplashScreen(sge.dsp.Room):
         self.timer = 0
 
     def event_room_start(self):
+        # Reset the view (it might have been moved by the previous level)
+        # This also works for the end (which consists of a SplashScreen followed
+        # by a TitleScreen, since the first resets the position)
+        sge.game.current_room.views[0].x = 0
         if self.transition is not None:
             room = sge.game.next_room()
             if room is not None:
